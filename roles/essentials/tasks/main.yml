@@ -1,0 +1,51 @@
+---
+
+- name: Install essential packages to their latest version
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: present
+  with_items:
+    - git
+    - vim
+    - curl
+    - ufw
+    - wget
+    - unzip
+    - apache2
+    - pip
+  become: true
+
+- name: Allow OpenSSH rule
+  ufw:
+    rule: allow
+    name: OpenSSH
+    
+- name: Allow Apache
+  ufw:
+    name: Apache
+    rule: allow
+
+- name: Allow port 22 (SSH)
+  ufw:
+     port: '22'
+     proto: tcp
+     rule: allow
+
+- name: Allow port 80 (HTTP)
+  ufw:
+     port: '80'
+     proto: tcp
+     rule: allow
+- name: Allow port 443 (HTTPs)
+  ufw:
+     port: '443'
+     rule: allow
+- name: Allow port 3306 (MySQL)
+  ufw:
+     port: '3306'
+     rule: allow
+- name: Allow port 5432 (PostgreSQL)
+  ufw:
+     port: '5432'
+     rule: allow

@@ -1,0 +1,71 @@
+- name: Update Apt Repository
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: Upgrade The Apt Repository
+  apt: upgrade=yes cache_valid_time=3600
+
+- name: Install Python3
+  apt: name=python3 state=latest
+
+- name: Install Pip
+  apt: name=pip state=latest
+
+- name: Install MySQL Server
+  apt:
+    name: mysql-server
+    state: latest
+
+- name: Install MySQL Client
+  apt:
+    name: mysql-client
+    state: latest
+- name: Install PyMySQL Library
+  pip:
+    name: pymysql
+    state: latest
+
+- name: Start MySQL
+  service:
+    name: mysql
+    state: started
+    enabled: true
+
+- name: Set MySQL root password
+  mysql_user:
+    name: root
+    password: Mekty_1996
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Delete Anony MySQL user
+  mysql_user:
+    login_user: root
+    login_password: Mekty_1996
+    name: ""
+    host_all: yes
+    state: absent
+
+- name: Remove all the mysql database
+  mysql_db:
+    name: test
+    login_user: root
+    login_password: Mekty_1996
+    state: absent
+
+- name: Create a DB
+  mysql_db:
+    name: laravel_project
+    state: present
+    login_user: root
+    login_password: Mekty_1996
+
+- name: Copy script for pgsql from master node to remote node
+  copy:
+    src: script.sh
+    dest: /home/ubuntu
+    mode: "0775"
+    owner: ubuntu
+    group: ubuntu
+
+- name: Run PostgreSQL Script to Install and configure it
+  command: sh /home/ubuntu/script.sh

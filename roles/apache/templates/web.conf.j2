@@ -1,0 +1,12 @@
+<VirtualHost *:80>
+    ServerAdmin victorsomtochukwu@gmail.com
+    ServerName mbadady.me
+    DocumentRoot /var/www/html/laravel/public
+
+    <Directory /var/www/html/laravel>
+    AllowOverride All
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>

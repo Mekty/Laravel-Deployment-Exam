@@ -1,0 +1,26 @@
+- name: Create apache vhosts for  domain
+  template:
+    src: web.conf.j2
+    dest: "/etc/apache2/sites-available/laravel.conf"
+    owner: www-data
+    group: www-data
+    mode: "0644"
+
+- name: Enable the Apache rewrite module
+  command: a2enmod rewrite
+
+- name: Disable apache default host configuration
+  command: a2dissite 000-default.conf
+
+- name: Activate the lavarel virtual host configuration
+  command: a2ensite laravel.conf
+
+- name: restart apache2
+  service:
+    state: restarted
+    name: apache2
+    daemon_reload: yes
+
+- name: set timezone to Africa/Lagos
+  timezone:
+    name: Africa/Lagos

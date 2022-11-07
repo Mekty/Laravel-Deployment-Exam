@@ -1,0 +1,132 @@
+      state: present
+      update_cache: yes
+  with_items:
+    - libapache2-mod-php
+    - php
+    - php8.1-common
+    - php8.1-tokenizer
+    - php8.1-bcmath
+    - php8.1-opcache
+    - php8.1-cli
+    - php8.1-curl
+    - php8.1-gd
+    - php8.1-intl
+    - php8.1-mbstring
+    - php8.1-mysql
+    - php8.1-pgsql
+    - php8.1-xml
+    - php8.1-zip
+  become: true
+
+- name: checkout latest code from github
+  command: git clone https://github.com/f1amy/laravel-realworld-example-app.git
+
+- name: Checking if laravel-realworld-example exists
+  stat:
+ path: /home/ubuntu/laravel-realworld-example-app
+  register: file_data
+- name: Report if the directory exists
+  debug:
+    msg: "The directory exists"
+  when: file_data.stat.exists
+- name: Report Missing directory
+  debug:
+    msg: "The directory does not exist"
+  when: not file_data.stat.exists
+
+- name: Move repo to web folder
+  command: mv /home/ubuntu/laravel-realworld-example-app /var/www/html/
+
+
+- name: copy lavarel project
+  command: mv /var/www/html/laravel-realworld-example-app /var/www/html/laravel
+
+- name: Change permission
+  command: chgrp -R www-data /var/www/html/laravel/
+
+- name: Change Ownership of file
+  file:
+          path: /var/www/html/laravel
+          state: directory
+          recurse: yes
+          owner: www-data
+          group: www-data
+- name: Change permission
+  command: chmod -R 775 /var/www/html/laravel/storage
+
+- name: Change permission
+  command: chmod -R 775 /var/www/html/laravel/bootstrap/cache
+
+- name: Change permission
+  command: chmod -R 775 /var/www/html/laravel
+
+- name: Copy .env.example to .env
+  copy:
+          dest: /var/www/html/laravel/.env
+          group: root
+          owner: root
+          mode: 0755
+          src: /var/www/html/laravel/.env.example
+          remote_src: yes
+
+- name: set APP_NAME
+  lineinfile: dest=/var/www/html/laravel/.env regexp='^APP_NAME=' line=APP_NAME=MyApp
+
+- name: set APP_URL
+  lineinfile: dest=/var/www/html/laravel/.env regexp='^APP_URL=' line=APP_URL=mekty.me
+
+- name: set DB_CONNECTION
+  lineinfile: dest=/var/www/html/laravel/.env regexp='^DB_CONNECTION=' line=DB_CONNECTION=mysql
+
+- name: set DB_HOST
+  lineinfile: dest=/var/www/html/laravel/.env regexp='^DB_HOST=' line=DB_HOST=localhost
+
+- name: set DB_PORT
+  lineinfile: dest=/var/www/html/laravel/.env regexp='^DB_PORT=' line=DB_PORT=3306
+
+- name: set DB_DATABASE
+  lineinfile: dest=/var/www/html/laravel/.env regexp='^DB_DATABASE=' line=DB_DATABASE=laravel_project
+
+- name: set DB_USERNAME
+  lineinfile: dest=/var/www/html/laravel/.env regexp='^DB_USERNAME=' line=DB_USERNAME=root
+
+- name: set DB_PASSWORD
+  lineinfile: dest=/var/www/html/laravel/.env regexp='^DB_PASSWORD=' line=DB_PASSWORD=Mekty_1996
+
+- name: Download Installer
+  shell: curl -sS https://getcomposer.org/installer | php
+  args:
+          chdir: /usr/src
+          creates: /usr/local/bin/composer
+
+
+
+- name: Add composer to global path
+  copy:
+    dest: /usr/local/bin/composer
+    group: root
+    owner: root
+    mode: 0755
+    src: /usr/src/composer.phar
+    remote_src: yes
+
+
+- name: Update system
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: Upgrade System
+  apt: upgrade=yes cache_valid_time=3600
+
+- name: make composer executable
+  file:
+ path: /usr/local/bin/composer
+    mode: a+x
+    state: file
+
+- name: Update system
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: Create the web.php file in the routes directory
+  template:
+    src: web.php.j2
+    dest: "/var/www/html/laravel/routes/web.php"

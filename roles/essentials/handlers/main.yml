@@ -1,0 +1,15 @@
+---
+
+- name: restart apache2
+  service:
+    state: restarted
+    name: apache2
+    daemon_reload: yes
+
+- name: Start ufw
+  service:
+    name: ufw
+    state: enabled
+    enabled: yes
+    policy: allow
+  become: true

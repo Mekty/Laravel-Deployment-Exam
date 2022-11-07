@@ -1,0 +1,19 @@
+- name: Update Composer
+  command: composer self-update --stable
+
+- name: installs all composer lib
+  command: sudo composer install --no-interaction
+  args:
+    chdir: /var/www/html/laravel
+
+- name: Set the App Key in your .env file
+  command: php /var/www/html/laravel/artisan key:generate
+
+- name: Give Application Speed Boost
+  command: php /var/www/html/laravel/artisan config:cache
+
+- name: Install Our MySQL Database
+  command: php /var/www/html/laravel/artisan migrate:fresh
+
+- name: Run the php artisan migrate seed
+  command: php /var/www/html/laravel/artisan migrate --seed
